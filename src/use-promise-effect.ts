@@ -1,13 +1,12 @@
-import { useEffect } from 'react'
-
+import { useEffect, EffectCallback, DependencyList } from 'react'
 export default function usePromiseEffect(
-  effect: () => Promise<void | (() => void)> | (() => () => void | void),
-  deps?: ReadonlyArray<any> | undefined
+  effect: (() => Promise<void | (() => void | undefined)>) | EffectCallback,
+  deps?: DependencyList
 ) {
   return useEffect(() => {
     const valueOrPromise = effect()
     return () => {
-      Promise.resolve(valueOrPromise).then(cleanup => cleanup && cleanup())
+      Promise.resolve(valueOrPromise).then(cleanup => typeof cleanup === 'function' && cleanup())
     }
   }, deps)
 }
